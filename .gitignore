@@ -1,0 +1,91 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+.yarn/
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+
+# Testing & Coverage
+coverage/
+*.lcov
+.nyc_output/
+
+# Production & Build outputs
+dist/
+build/
+out/
+.next/
+.nuxt/
+.vuepress/dist/
+.serverless/
+.fusebox/
+.dynamodb/
+tsconfig.tsbuildinfo
+
+# Debug & Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Environment & Local secrets
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
+*.env.*
+!.env.example
+!.env.template
+
+# IDEs and Editors
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+
+# Operating System files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Caches & Temporary files
+.cache/
+.parcel-cache/
+.eslintcache
+.stylelintcache
+.prettiercache
+.node_repl_history
+*.tty
+
+# Lockfiles (optional - uncomment if you prefer not to commit package lockfiles)
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# Database & Storage
+*.sqlite
+*.sqlite3
+*.db
+/data/
+/db/
