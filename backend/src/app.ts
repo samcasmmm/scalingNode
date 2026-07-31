@@ -1,9 +1,12 @@
-import express, { Application } from "express";
+import express, { Application, RequestHandler } from "express";
 import cors from "cors";
 import helmet from "helmet";
 import hpp from "hpp";
 import rateLimit from "express-rate-limit";
 import { Security } from './core/config/security.config.js';
+import { observability } from './core/config/observability.config.js';
+import { notFoundMiddleware } from './core/middlewares/not-found.middleware.js';
+import { errorHandlerMiddleware } from './core/middlewares/error.middleware.js';
 
 class App {
    public readonly instance: Application;
@@ -44,10 +47,16 @@ class App {
       this.instance.use(rateLimit(this.security.RATE_LIMIT_OPTIONS));
       this.instance.disable(this.security.X_POWERED_BY);
    }
-   private initializeObservability(): void { }
+   private initializeObservability(): void {
+      this.instance.use(observability);
+   }
    private initializeMiddleWares(): void { }
-   private initializeRoutes(): void { }
-   private initializeErrorHandling() { }
+   private initializePublicRoutes(): void { }
+   private initializePrivateRoutes(): void { }
+   private initializeErrorHandling(): void {
+      this.instance.use(notFoundMiddleware);
+      this.instance.use(errorHandlerMiddleware);
+   }
 }
 
 export default App;

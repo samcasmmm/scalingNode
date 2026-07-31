@@ -95,6 +95,20 @@ const envSchema = z.object({
     .default('10')
     .transform((val) => parseInt(val, 10)),
 
+  // --- Redis Cache / Store Settings ---
+  REDIS_ENABLED: z
+    .string()
+    .optional()
+    .default('false')
+    .transform((val) => val === 'true'),
+  REDIS_HOST: z.string().optional().default('localhost'),
+  REDIS_PORT: z
+    .string()
+    .optional()
+    .default('6379')
+    .transform((val) => parseInt(val, 10)),
+  REDIS_PASSWORD: z.string().optional().default(''),
+
   // --- Security Settings ---
   FRONTEND_URL: z
     .string()
