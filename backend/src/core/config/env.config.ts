@@ -2,9 +2,6 @@ import { z } from 'zod';
 import dotenv from 'dotenv';
 import path from 'path';
 
-// -----------------------------------------------------------------------------
-// Environment Constants & Types
-// -----------------------------------------------------------------------------
 export const ENV_ENUMS = {
   PRODUCTION: 'production',
   DEVELOPMENT: 'development',
@@ -19,20 +16,15 @@ const ENV_FILE_MAP: Record<EnvType, string> = {
   [ENV_ENUMS.DEVELOPMENT]: 'env/.env.dev',
 };
 
-// -----------------------------------------------------------------------------
-// Environment Configuration Loader
-// -----------------------------------------------------------------------------
-const rawNodeEnv = (process.env.NODE_ENV as EnvType) || ENV_ENUMS.DEVELOPMENT;
-const envFilePath = ENV_FILE_MAP[rawNodeEnv] ?? ENV_FILE_MAP[ENV_ENUMS.DEVELOPMENT];
+
+const RAW_NODE_ENV = (process.env.NODE_ENV as EnvType) || ENV_ENUMS.DEVELOPMENT;
+const ENV_FILE_PATH = ENV_FILE_MAP[RAW_NODE_ENV] ?? ENV_FILE_MAP[ENV_ENUMS.DEVELOPMENT];
 
 dotenv.config({
-  path: path.resolve(process.cwd(), envFilePath),
+  path: path.resolve(process.cwd(), ENV_FILE_PATH),
   override: true,
 });
 
-// -----------------------------------------------------------------------------
-// Environment Variables Validation Schema
-// -----------------------------------------------------------------------------
 const envSchema = z.object({
   // --- Server Environment ---
   NODE_ENV: z
@@ -102,6 +94,12 @@ const envSchema = z.object({
     .optional()
     .default('10')
     .transform((val) => parseInt(val, 10)),
+
+  // --- Security Settings ---
+  FRONTEND_URL: z
+    .string()
+    .default('')
+    .optional(),
 });
 
 // -----------------------------------------------------------------------------
