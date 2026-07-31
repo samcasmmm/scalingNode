@@ -21,8 +21,13 @@ import chalk from 'chalk';
  *   npm run make
  */
 
+function cleanInput(str) {
+  return (str || '').replace(/[\/\\]+/g, '').trim();
+}
+
 function toPascalCase(input) {
-  return input.replace(/[-_\s]+(.)?/g, (_, c) => (c ? c.toUpperCase() : '')).replace(/^(.)/, (c) => c.toUpperCase());
+  const clean = cleanInput(input);
+  return clean.replace(/[-_\s]+(.)?/g, (_, c) => (c ? c.toUpperCase() : '')).replace(/^(.)/, (c) => c.toUpperCase());
 }
 
 function toCamelCase(input) {
@@ -31,7 +36,8 @@ function toCamelCase(input) {
 }
 
 function toSnakeCase(input) {
-  return input
+  const clean = cleanInput(input);
+  return clean
     .replace(/([a-z0-9])([A-Z])/g, '$1_$2')
     .replace(/[-\s]+/g, '_')
     .toLowerCase();
@@ -49,6 +55,7 @@ async function main() {
   let entityName = args[1];
   let tenantScoped = !flags.includes('--no-tenant');
   let softDelete = !flags.includes('--no-soft-delete');
+  let createSchema = flags.includes('--schema');
 
   if (!moduleGroup || !entityName) {
     const answers = await inquirer.prompt([
@@ -68,6 +75,13 @@ async function main() {
       },
       {
         type: 'confirm',
+        name: 'createSchema',
+        message: 'Generate a new database schema file?',
+        default: false,
+        when: !flags.includes('--schema') && !flags.includes('--no-schema'),
+      },
+      {
+        type: 'confirm',
         name: 'tenantScoped',
         message: 'Does this entity belong to a tenant (tenantId column + scoping)?',
         default: true,
@@ -84,6 +98,7 @@ async function main() {
 
     moduleGroup = moduleGroup || answers.moduleGroup;
     entityName = entityName || answers.entityName;
+    if (answers.createSchema !== undefined) createSchema = answers.createSchema;
     if (answers.tenantScoped !== undefined) tenantScoped = answers.tenantScoped;
     if (answers.softDelete !== undefined) softDelete = answers.softDelete;
   }
@@ -98,14 +113,15 @@ async function main() {
   const moduleDir = path.resolve(process.cwd(), 'src/modules', group, entitySnake.replace(/_/g, '-'));
   fs.mkdirSync(moduleDir, { recursive: true });
 
-  const schemaDir = path.resolve(process.cwd(), 'src/database/schema/modules', group);
-  fs.mkdirSync(schemaDir, { recursive: true });
-
   const files = {};
 
   // --- Schema -------------------------------------------------------------
-  files[`${schemaDir}/${entitySnake}.schema.ts`] =
-    `import { pgTable, varchar, text, bigint } from 'drizzle-orm/pg-core';
+  if (createSchema) {
+    const schemaDir = path.resolve(process.cwd(), 'src/database/schema/modules', group);
+    fs.mkdirSync(schemaDir, { recursive: true });
+
+    files[`${schemaDir}/${entitySnake}.schema.ts`] =
+      `import { pgTable, varchar, text, bigint } from 'drizzle-orm/pg-core';
 import { idColumn, timestamps, isActiveColumn } from '@/database/schema/core/_shared.columns.js';
 ${tenantScoped ? "import { tenantsTable } from '@/database/schema/core/multi-tenancy.schema.js';\n" : ''}
 export const ${entity}sTable = pgTable('${tableName}', {
@@ -118,6 +134,7 @@ ${softDelete ? '  ...timestamps,\n' : '  ...timestamps, // includes deletedAt; r
 export type ${Entity} = typeof ${entity}sTable.$inferSelect;
 export type New${Entity} = typeof ${entity}sTable.$inferInsert;
 `;
+  }
 
   // --- Repository -----------------------------------------------------------
   files[`${moduleDir}/${entitySnake}.repository.ts`] = `import { injectable } from 'tsyringe';
@@ -268,6 +285,7 @@ paths:
           description: ${Entity} deleted.
 `;
   for (const [filePath, content] of Object.entries(files)) {
+    fs.mkdirSync(path.dirname(filePath), { recursive: true });
     if (fs.existsSync(filePath)) {
       console.log(chalk.yellow(`  skip (exists): ${path.relative(process.cwd(), filePath)}`));
       continue;
