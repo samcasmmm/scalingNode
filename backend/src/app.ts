@@ -7,6 +7,8 @@ import { Security } from './core/config/security.config.js';
 import { observability } from './core/config/observability.config.js';
 import { notFoundMiddleware } from './core/middlewares/not-found.middleware.js';
 import { errorHandlerMiddleware } from './core/middlewares/error.middleware.js';
+import publicRouter from './routes/public.routes.js';
+import authenticatedRouter from './routes/authenticated.routes.js';
 
 class App {
    public readonly instance: Application;
@@ -23,6 +25,8 @@ class App {
       this.initializeSecurity();
       this.initializeObservability();
       this.initializeMiddleWares();
+      this.initializePublicRoutes();
+      this.initializePrivateRoutes();
       this.initializeErrorHandling();
    }
 
@@ -51,8 +55,12 @@ class App {
       this.instance.use(observability);
    }
    private initializeMiddleWares(): void { }
-   private initializePublicRoutes(): void { }
-   private initializePrivateRoutes(): void { }
+   private initializePublicRoutes(): void {
+      this.instance.use('/api/v1/public', publicRouter);
+   }
+   private initializePrivateRoutes(): void {
+      this.instance.use('/api/v1', authenticatedRouter);
+   }
    private initializeErrorHandling(): void {
       this.instance.use(notFoundMiddleware);
       this.instance.use(errorHandlerMiddleware);

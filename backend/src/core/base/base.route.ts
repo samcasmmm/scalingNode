@@ -1,5 +1,5 @@
 import { Router, type RequestHandler } from 'express';
-import isAuth from '@/core/middlewares/auth.middleware.js';
+import { authMiddleware } from '@/core/middlewares/auth.middleware.js';
 import { requirePermission } from '@/core/middlewares/rbac.middleware.js';
 import { validate, type RequestSchema } from '@/core/middlewares/validate.middleware.js';
 import type { BaseController } from './base.controller.js';
@@ -25,7 +25,7 @@ export function buildCrudRouter(
   options: CrudRouteOptions,
 ): Router {
   const router = Router();
-  const guard: RequestHandler[] = options.public ? [] : [isAuth];
+  const guard: RequestHandler[] = options.public ? [] : [authMiddleware];
 
   options.extend?.(router);
 
