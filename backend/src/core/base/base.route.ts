@@ -1,15 +1,14 @@
 import { Router, type RequestHandler } from 'express';
-import type { ZodType } from 'zod';
-import { isAuth } from '@/core/middlewares/auth.middleware.js';
+import isAuth from '@/core/middlewares/auth.middleware.js';
 import { requirePermission } from '@/core/middlewares/rbac.middleware.js';
-import { validate } from '@/core/middlewares/validate.middleware.js';
+import { validate, type RequestSchema } from '@/core/middlewares/validate.middleware.js';
 import type { BaseController } from './base.controller.js';
 
 export interface CrudRouteOptions {
   /** RBAC key, e.g. 'user' -> user:read, user:create, user:update, user:delete */
   permissionKey: string;
-  createSchema?: ZodType;
-  updateSchema?: ZodType;
+  createSchema?: RequestSchema;
+  updateSchema?: RequestSchema;
   /** Extra routes registered before the generic /:id routes */
   extend?: (router: Router) => void;
   /** Skip auth (e.g. public signup-style endpoints) — rare, default false */

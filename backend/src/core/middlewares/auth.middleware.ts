@@ -1,0 +1,46 @@
+import { type Request, type Response, type NextFunction } from 'express';
+import jwt from 'jsonwebtoken';
+import env from '../config/env.config.js';
+
+export interface DecodedToken {
+  userId: number;
+  userName?: string;
+  email?: string;
+  tenantId?: number;
+  organizationId?: number;
+  branchId?: number;
+}
+
+export const isAuth = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      res.status(401).json({
+        success: false,
+        error: 'Unauthorized: Authentication token is missing or invalid.',
+      });
+      return;
+    }
+
+    const token = authHeader.substring(7);
+    const decoded = jwt.verify(token, env.JWT_ACCESS_SECRET) as DecodedToken;
+
+    req.user = {
+      id: decoded.userId,
+      userName: decoded.userName,
+      email: decoded.email,
+      tenantId: decoded.tenantId,
+      organizationId: decoded.organizationId,
+      branchId: decoded.branchId,
+    };
+
+    next();
+  } catch (error) {
+    res.status(401).json({
+      success: false,
+      error: 'Unauthorized: Invalid or expired token.',
+    });
+  }
+};
+
+export default isAuth;

@@ -7,18 +7,13 @@ import chalk from 'chalk';
 /**
  * scripts/create-module.js  (npm run make)
  *
- * Scaffolds a new module (an HRMS entity, a CRM entity, anything) using the
- * exact same BaseRepository/BaseService/BaseController/buildCrudRouter
- * pattern as the core modules (see src/modules/tenant/* as the reference
- * implementation). This is what makes "100+ modules" tractable: each one is
- * a ~5-file, mostly-generated stack instead of hand-rolled boilerplate.
- *
- * It does NOT:
- *  - touch core/container/tokens.ts or register.ts (prints the snippets to add — kept manual, deliberately, since decorator-based DI can't be safely code-modded)
- *  - mount the router in modules/index.ts (same reason)
+ * Scaffolds a new module (an HRMS entity, a CRM entity, anything) using
+ * tsyringe dependency injection and the BaseRepository / BaseService /
+ * BaseController / buildCrudRouter pattern.
  *
  * Usage:
  *   npm run make
+ *   npm run make -- <group> <entity>
  */
 
 function cleanInput(str) {
@@ -105,7 +100,7 @@ async function main() {
 
   const group = toKebabCase(moduleGroup);
   const Entity = toPascalCase(entityName);
-  const entity = toCamelCase(entityName);
+  const entity = toCamelCase(entityName); // also the tokens.ts MODULE_DEFINITIONS key
   const entitySnake = toSnakeCase(entityName);
   const tableName = `${entitySnake}s`;
   const permissionKey = `${group}.${entitySnake}`;
@@ -124,67 +119,111 @@ async function main() {
       `import { pgTable, varchar, text, bigint } from 'drizzle-orm/pg-core';
 import { idColumn, timestamps, isActiveColumn } from '@/database/schema/core/_shared.columns.js';
 ${tenantScoped ? "import { tenantsTable } from '@/database/schema/core/multi-tenancy.schema.js';\n" : ''}
+/**
+ * Database table definition for ${Entity}s.
+ * Add custom columns, relations, and indexes below.
+ */
 export const ${entity}sTable = pgTable('${tableName}', {
   id: idColumn(),
 ${tenantScoped ? "  tenantId: bigint('tenant_id', { mode: 'number' }).notNull().references(() => tenantsTable.id, { onDelete: 'cascade' }),\n" : ''}  name: varchar('name', { length: 150 }).notNull(),
   description: text('description'),
   isActive: isActiveColumn(),
-${softDelete ? '  ...timestamps,\n' : '  ...timestamps, // includes deletedAt; remove manually if you truly do not want soft delete\n'}});
+${softDelete ? '  ...timestamps,\n' : '  ...timestamps, // includes deletedAt for soft delete\n'}});
 
 export type ${Entity} = typeof ${entity}sTable.$inferSelect;
 export type New${Entity} = typeof ${entity}sTable.$inferInsert;
 `;
   }
 
+  const repoGenerics = createSchema ? `<typeof ${entity}sTable, ${Entity}, New${Entity}>` : `<any, any, any>`;
+  const repoSuper = createSchema ? `${entity}sTable` : `null as any`;
+  const serviceGenerics = createSchema ? `<${Entity}, New${Entity}>` : `<any, any>`;
+  const controllerGenerics = createSchema ? `<${Entity}, New${Entity}>` : `<any, any>`;
+  const schemaImport = createSchema
+    ? `import { ${entity}sTable, type ${Entity}, type New${Entity} } from '@/database/schema/modules/${group}/${entitySnake}.schema.js';\n`
+    : '';
+  const schemaTypeImport = createSchema
+    ? `import type { ${Entity}, New${Entity} } from '@/database/schema/modules/${group}/${entitySnake}.schema.js';\n`
+    : '';
+
   // --- Repository -----------------------------------------------------------
   files[`${moduleDir}/${entitySnake}.repository.ts`] = `import { injectable } from 'tsyringe';
-import { ${entity}sTable, type ${Entity}, type New${Entity} } from '@/database/schema/modules/${group}/${entitySnake}.schema.js';
-import { BaseRepository } from '@/core/base/base.repository.js';
+${schemaImport}import { BaseRepository } from '@/core/base/base.repository.js';
 
+/**
+ * Data access repository for ${Entity}.
+ * Extends BaseRepository for automatic CRUD, pagination, and tenant scoping.
+ * Add custom Drizzle database queries and complex data operations below.
+ */
 @injectable()
-export class ${Entity}Repository extends BaseRepository<typeof ${entity}sTable, ${Entity}, New${Entity}> {
+export class ${Entity}Repository extends BaseRepository${repoGenerics} {
   constructor() {
-    super(${entity}sTable);
+    super(${repoSuper});
   }
+
+  // Add custom database queries here, e.g.:
+  // async findByName(name: string) {
+  //   return this.findOne(eq((this.table as any).name, name));
+  // }
 }
 `;
 
   // --- Service --------------------------------------------------------------
   files[`${moduleDir}/${entitySnake}.service.ts`] = `import { inject, injectable } from 'tsyringe';
 import { BaseService } from '@/core/base/base.service.js';
-import type { ${Entity}, New${Entity} } from '@/database/schema/modules/${group}/${entitySnake}.schema.js';
-import type { ${Entity}Repository } from './${entitySnake}.repository.js';
+${schemaTypeImport}import { ${Entity}Repository } from './${entitySnake}.repository.js';
 
+/**
+ * Business logic service for ${Entity}.
+ * Extends BaseService for default CRUD orchestration over BaseRepository.
+ * Add domain rules, external integrations, transactions, and event emission below.
+ */
 @injectable()
-export class ${Entity}Service extends BaseService<${Entity}, New${Entity}> {
-  constructor(@inject('${Entity}Repository') ${entity}Repository: ${Entity}Repository) {
+export class ${Entity}Service extends BaseService${serviceGenerics} {
+  constructor(@inject(${Entity}Repository) ${entity}Repository: ${Entity}Repository) {
     super(${entity}Repository, '${Entity}');
   }
+
+  // Add domain business logic and custom service methods here
 }
 `;
 
   // --- Controller -----------------------------------------------------------
   files[`${moduleDir}/${entitySnake}.controller.ts`] = `import { inject, injectable } from 'tsyringe';
 import { BaseController } from '@/core/base/base.controller.js';
-import type { ${Entity}, New${Entity} } from '@/database/schema/modules/${group}/${entitySnake}.schema.js';
-import type { ${Entity}Service } from './${entitySnake}.service.js';
+${schemaTypeImport}import { ${Entity}Service } from './${entitySnake}.service.js';
 
+/**
+ * HTTP controller for ${Entity}.
+ * Extends BaseController for standard list, getById, create, update, and remove actions.
+ * Add custom HTTP request handlers and endpoint logic below.
+ */
 @injectable()
-export class ${Entity}Controller extends BaseController<${Entity}, New${Entity}> {
-  constructor(@inject('${Entity}Service') ${entity}Service: ${Entity}Service) {
+export class ${Entity}Controller extends BaseController${controllerGenerics} {
+  constructor(@inject(${Entity}Service) ${entity}Service: ${Entity}Service) {
     super(${entity}Service, '${entitySnake}');
   }
+
+  // Add custom HTTP request handlers here
 }
 `;
 
   // --- Validation -------------------------------------------------------------
   files[`${moduleDir}/${entitySnake}.validation.ts`] = `import { z } from 'zod';
 
+/**
+ * Request body schema for creating ${Entity}.
+ * Add your validation fields below.
+ */
 export const create${Entity}Schema = z.object({
-  name: z.string().min(1).max(150),
-  description: z.string().max(1000).optional(),
+  // Add required/optional request fields here, e.g.:
+  // name: z.string().min(1).max(150),
+  // description: z.string().max(1000).optional(),
 });
 
+/**
+ * Request body schema for updating ${Entity} (partial fields).
+ */
 export const update${Entity}Schema = create${Entity}Schema.partial();
 `;
 
@@ -198,6 +237,12 @@ import { ${Entity}Controller } from './${entitySnake}.controller.js';
 const router: Router = Router();
 const controller = container.resolve(${Entity}Controller);
 
+/**
+ * ${Entity} API routes.
+ * Automatically mounts CRUD endpoints via buildCrudRouter:
+ * GET / (list), POST / (create), GET /:id, PATCH /:id, DELETE /:id
+ * Add custom route definitions below.
+ */
 router.use(
   '/',
   buildCrudRouter(controller, {
@@ -207,82 +252,10 @@ router.use(
   }),
 );
 
+// Add custom routes here, e.g.:
+// router.get('/custom-endpoint', controller.customHandler);
+
 export default router;
-`;
-  // --- Docs -------------------------------------------------------------------
-  files[`${moduleDir}/${entitySnake}.docs.yaml`] = `tags:
-  - name: ${Entity}s
-    description: ${Entity} management endpoints
-
-paths:
-  /${group}/${tableName}:
-    get:
-      tags: [${Entity}s]
-      summary: List all ${tableName} (paginated)
-      security:
-        - bearerAuth: []
-      responses:
-        '200':
-          description: ${Entity}s fetched.
-    post:
-      tags: [${Entity}s]
-      summary: Create ${entity}
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required: [name]
-              properties:
-                name: { type: string }
-                description: { type: string }
-      responses:
-        '201':
-          description: ${Entity} created.
-
-  /${group}/${tableName}/{id}:
-    get:
-      tags: [${Entity}s]
-      summary: Get ${entity} by ID
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema: { type: integer }
-      responses:
-        '200':
-          description: ${Entity} details.
-    patch:
-      tags: [${Entity}s]
-      summary: Update ${entity}
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema: { type: integer }
-      responses:
-        '200':
-          description: ${Entity} updated.
-    delete:
-      tags: [${Entity}s]
-      summary: Delete ${entity}
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema: { type: integer }
-      responses:
-        '200':
-          description: ${Entity} deleted.
 `;
   for (const [filePath, content] of Object.entries(files)) {
     fs.mkdirSync(path.dirname(filePath), { recursive: true });
@@ -294,33 +267,24 @@ paths:
     console.log(chalk.green(`  created: ${path.relative(process.cwd(), filePath)}`));
   }
 
-  console.log('\n' + chalk.bold("Next steps (manual — decorator DI can't be safely code-modded):"));
+  const moduleRelPath = `./${group}/${entitySnake.replace(/_/g, '-')}/${entitySnake}`;
+
+  console.log('\n' + chalk.bold('Next steps:'));
   console.log(
     chalk.cyan(`
-1. Export the schema from src/database/schema/index.ts:
+1. Export the schema from src/database/schema/index.ts (if schema generated):
      export * from './modules/${group}/${entitySnake}.schema.js';
 
 2. Register the module in modules_catalog (if it's a purchasable, non-core module):
      INSERT INTO modules_catalog (key, name) VALUES ('${group}', '${toPascalCase(group)}');
 
-3. Add DI tokens in src/core/container/tokens.ts:
-     ${Entity}Repository: Symbol.for('${Entity}Repository'),
-     ${Entity}Service: Symbol.for('${Entity}Service'),
-     ${Entity}Controller: Symbol.for('${Entity}Controller'),
-
-4. Register in src/core/container/register.ts:
-     container.registerSingleton(TOKENS.${Entity}Repository, ${Entity}Repository);
-     container.registerSingleton(TOKENS.${Entity}Service, ${Entity}Service);
-     container.registerSingleton(TOKENS.${Entity}Controller, ${Entity}Controller);
-   (then switch the @inject(...) calls in the generated service/controller from string tokens to TOKENS.${Entity}Repository / TOKENS.${Entity}Service)
-
-5. Mount the router in src/modules/index.ts:
-     import ${entity}Routes from './${group}/${entitySnake.replace(/_/g, '-')}/${entitySnake}.routes.js';
+3. Mount the router in src/modules/index.ts:
+     import ${entity}Routes from '${moduleRelPath}.routes.js';
      router.use('/${group}/${toKebabCase(entityName)}s', ${entity}Routes);
 
-6. Seed permissions for this module (permissions table): ${permissionKey}:read / :create / :update / :delete
+4. Seed permissions for this module (permissions table): ${permissionKey}:read / :create / :update / :delete
 
-7. Run: npm run db:generate && npm run db:migrate
+5. Run: npm run db:generate && npm run db:migrate
 `),
   );
 }

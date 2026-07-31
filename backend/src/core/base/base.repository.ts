@@ -41,6 +41,8 @@ export abstract class BaseRepository<
   TSelect extends Record<string, any> = TTable['$inferSelect'],
   TInsert extends Record<string, any> = TTable['$inferInsert'],
 > {
+  protected readonly db = db;
+
   protected constructor(protected readonly table: TTable) { }
 
   protected get idColumn(): PgColumn {

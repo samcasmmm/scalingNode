@@ -2,35 +2,40 @@ import type { Request, Response, NextFunction } from "express";
 import { ZodType } from "zod";
 import { ValidationError } from "@/core/errors/index.js";
 
-interface RequestSchema {
-  body?: ZodType;
-  params?: ZodType;
-  query?: ZodType;
-}
+export type RequestSchema =
+  | ZodType
+  | {
+    body?: ZodType;
+    params?: ZodType;
+    query?: ZodType;
+  };
 
 /**
  * Generic zod request validator.
  *
- * Two usage modes:
- *   validate({ body: createUserSchema })
- *   validate({ body: updateUserSchema, params: idParamSchema, query: pageQuerySchema })
- *
- * Each provided part is validated independently and written back to `req`
- * so downstream handlers see coerced/transformed values (e.g. z.coerce.number()
- * on a query param), not the raw strings Express parsed off the wire.
+ * Supports two usage modes:
+ * 1. Single ZodType (validates req.body):
+ *    validate(createUserSchema)
+ * 2. Object with body, params, query parts:
+ *    validate({ body: updateUserSchema, params: idParamSchema, query: pageQuerySchema })
  */
 export function validate(schema: RequestSchema) {
   return (req: Request, _res: Response, next: NextFunction): void => {
+    const targetSchema =
+      "safeParse" in schema && typeof schema.safeParse === "function"
+        ? { body: schema as ZodType }
+        : (schema as { body?: ZodType; params?: ZodType; query?: ZodType });
+
     const issues: { field: string; message: string }[] = [];
 
-    const parts: Array<[keyof RequestSchema, "body" | "params" | "query"]> = [
+    const parts: Array<["body" | "params" | "query", "body" | "params" | "query"]> = [
       ["body", "body"],
       ["params", "params"],
       ["query", "query"],
     ];
 
     for (const [schemaKey, reqKey] of parts) {
-      const partSchema = schema[schemaKey];
+      const partSchema = targetSchema[schemaKey];
       if (!partSchema) continue;
 
       const result = partSchema.safeParse(req[reqKey]);

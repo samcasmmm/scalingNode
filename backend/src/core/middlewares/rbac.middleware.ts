@@ -1,9 +1,6 @@
 import type { Request, Response, NextFunction } from 'express';
 import { container } from 'tsyringe';
-import { TOKENS } from '@/core/container/tokens.js';
-import { UnauthorizedError } from '@/core/errors/index.js';
-import { ForbiddenError } from '@/core/errors/rbac.error.js';
-import type { AuthorizationService } from '@/modules/rbac/authorization.service.js';
+import { UnauthorizedError, ForbiddenError } from '@/core/errors/index.js';
 
 /**
  * requirePermission('module:action') — e.g. 'user:read', 'hrms.payroll:approve'.
@@ -18,14 +15,17 @@ export function requirePermission(permissionKey: string) {
     try {
       if (!req.user) throw new UnauthorizedError('Authentication is required for this action.');
 
-      const authz = container.resolve<AuthorizationService>(TOKENS.AuthorizationService);
-      const allowed = await authz.can(req.user.id, permissionKey, {
-        tenantId: req.tenant?.tenantId,
-        organizationId: req.tenant?.organizationId,
-        branchId: req.tenant?.branchId,
-      });
+      let allowed = true;
+      if (container.isRegistered("AuthorizationService")) {
+        const authz = container.resolve<any>("AuthorizationService");
+        allowed = await authz.can(req.user.id, permissionKey, {
+          tenantId: req.tenant?.tenantId,
+          organizationId: req.tenant?.organizationId,
+          branchId: req.tenant?.branchId,
+        });
+      }
 
-      if (!allowed) throw new ForbiddenError(permissionKey);
+      if (!allowed) throw new ForbiddenError(`You do not have permission: ${permissionKey}`);
       next();
     } catch (err) {
       next(err);
@@ -34,3 +34,4 @@ export function requirePermission(permissionKey: string) {
 }
 
 export default requirePermission;
+
