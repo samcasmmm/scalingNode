@@ -1,8 +1,9 @@
-import ResponseBuilder from '../response/response.builder.js';
+import ResponseBuilder from '@/core/response/response.builder.js';
 
 declare global {
   namespace Express {
     interface Request {
+      moduleName?: string;
       user?: {
         id: number;
         userName?: string;
@@ -26,4 +27,4 @@ declare global {
   }
 }
 
-export {};
+export { };

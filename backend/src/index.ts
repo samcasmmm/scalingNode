@@ -1,17 +1,16 @@
 import http from 'http'
-import env from './core/config/env.config.js';
-import App from './app.js';
-
+import env from '@/core/config/env.config.js';
+import { app } from '@/app.js'
 
 
 export class Server {
    private readonly PORT: number = 5000
    private readonly SERVER: http.Server;
    private shuttingDown: boolean = false
-   private app: App = new App();
+
    constructor() {
       this.PORT = env.PORT;
-      this.SERVER = http.createServer(this.app.getInstance());
+      this.SERVER = http.createServer(app);
 
    }
 

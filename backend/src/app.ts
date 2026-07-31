@@ -54,7 +54,9 @@ class App {
    private initializeObservability(): void {
       this.instance.use(observability);
    }
-   private initializeMiddleWares(): void { }
+   private initializeMiddleWares(): void {
+      this.instance.use(rateLimit)
+   }
    private initializePublicRoutes(): void {
       this.instance.use('/api/v1/public', publicRouter);
    }
@@ -68,3 +70,5 @@ class App {
 }
 
 export default App;
+export const appInstance = new App();
+export const app = appInstance.getInstance();
