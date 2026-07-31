@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { authMiddleware } from '@/core/middlewares/auth.middleware.js';
-import usersRouter from '@/modules/users/users.routes.js';
+// import usersRouter from '@/modules/users/users.routes.js';
 
 const authenticatedRouter = Router();
 
@@ -8,6 +8,6 @@ const authenticatedRouter = Router();
 authenticatedRouter.use(authMiddleware);
 
 // Mount authenticated module routers below
-authenticatedRouter.use('/users', usersRouter);
+// authenticatedRouter.use('/users', usersRouter);
 
 export default authenticatedRouter;
