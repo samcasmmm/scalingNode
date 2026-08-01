@@ -14,17 +14,30 @@ export class UsersController extends BaseController<any, any> {
 
   public getProfile = async (req: Request, res: Response): Promise<void> => {
     const profile = await this.usersService.getProfile(req.user?.id);
+    if (profile) {
+      const { password, ...safeProfile } = profile;
+      res.build
+        .withStatus(200)
+        .withMessage('user.profile.retrieved')
+        .withData(safeProfile)
+        .success();
+      return;
+    }
 
     res.build
-      .withStatus(200)
-      .withMessage('user.profile.retrieved')
-      .withData(profile)
+      .withStatus(404)
+      .withMessage('user.profile.not_found')
       .success();
+  };
+
+  public create = async (req: Request, res: Response): Promise<void> => {
+    const created = await this.usersService.create(req.body);
+    const { password, ...safeUser } = created;
 
     res.build
-      .withStatus(200)
-      .withMessage('user.profile.retrieved')
-      .withData(profile)
+      .withStatus(201)
+      .withMessage('user.created')
+      .withData(safeUser)
       .success();
   };
 }

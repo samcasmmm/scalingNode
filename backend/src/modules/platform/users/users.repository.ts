@@ -1,19 +1,17 @@
 import { injectable } from 'tsyringe';
 import { BaseRepository } from '@/core/base/base.repository.js';
+import { usersTable, type User, type NewUser } from '@/database/index.js';
 
 /**
  * Data access repository for Users.
- * Extends BaseRepository for automatic CRUD, pagination, and tenant scoping.
- * Add custom Drizzle database queries and complex data operations below.
  */
 @injectable()
-export class UsersRepository extends BaseRepository<any, any, any> {
+export class UsersRepository extends BaseRepository<
+  typeof usersTable,
+  User,
+  NewUser
+> {
   constructor() {
-    super(null as any);
+    super(usersTable);
   }
-
-  // Add custom database queries here, e.g.:
-  // async findByName(name: string) {
-  //   return this.findOne(eq((this.table as any).name, name));
-  // }
 }

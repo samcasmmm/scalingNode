@@ -1,6 +1,5 @@
 import { Router } from 'express';
 import { container } from 'tsyringe';
-import { buildCrudRouter } from '@/core/base/base.route.js';
 import {
   createSubscriptionSchema,
   updateSubscriptionSchema,
@@ -16,14 +15,6 @@ const controller = container.resolve(SubscriptionController);
  * GET / (list), POST / (create), GET /:id, PATCH /:id, DELETE /:id
  * Add custom route definitions below.
  */
-router.use(
-  '/',
-  buildCrudRouter(controller, {
-    permissionKey: 'core.subscription',
-    createSchema: createSubscriptionSchema as any,
-    updateSchema: updateSubscriptionSchema as any,
-  }),
-);
 
 // Add custom routes here, e.g.:
 // router.get('/custom-endpoint', controller.customHandler);
