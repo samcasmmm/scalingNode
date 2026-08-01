@@ -1,14 +1,14 @@
-import type { Request, Response, NextFunction } from "express";
-import { ZodType } from "zod";
-import { ValidationError } from "@/core/errors/index.js";
+import type { Request, Response, NextFunction } from 'express';
+import { ZodType } from 'zod';
+import { ValidationError } from '@/core/errors/index.js';
 
 export type RequestSchema =
   | ZodType
   | {
-    body?: ZodType;
-    params?: ZodType;
-    query?: ZodType;
-  };
+      body?: ZodType;
+      params?: ZodType;
+      query?: ZodType;
+    };
 
 /**
  * Generic zod request validator.
@@ -22,16 +22,18 @@ export type RequestSchema =
 export function validate(schema: RequestSchema) {
   return (req: Request, _res: Response, next: NextFunction): void => {
     const targetSchema =
-      "safeParse" in schema && typeof schema.safeParse === "function"
+      'safeParse' in schema && typeof schema.safeParse === 'function'
         ? { body: schema as ZodType }
         : (schema as { body?: ZodType; params?: ZodType; query?: ZodType });
 
     const issues: { field: string; message: string }[] = [];
 
-    const parts: Array<["body" | "params" | "query", "body" | "params" | "query"]> = [
-      ["body", "body"],
-      ["params", "params"],
-      ["query", "query"],
+    const parts: Array<
+      ['body' | 'params' | 'query', 'body' | 'params' | 'query']
+    > = [
+      ['body', 'body'],
+      ['params', 'params'],
+      ['query', 'query'],
     ];
 
     for (const [schemaKey, reqKey] of parts) {
@@ -42,7 +44,7 @@ export function validate(schema: RequestSchema) {
       if (!result.success) {
         issues.push(
           ...result.error.issues.map((issue) => ({
-            field: [reqKey, ...issue.path].join("."),
+            field: [reqKey, ...issue.path].join('.'),
             message: issue.message,
           })),
         );
@@ -55,7 +57,7 @@ export function validate(schema: RequestSchema) {
     }
 
     if (issues.length > 0) {
-      return next(new ValidationError("Validation failed", issues));
+      return next(new ValidationError('Validation failed', issues));
     }
 
     next();

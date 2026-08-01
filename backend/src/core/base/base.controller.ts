@@ -1,6 +1,9 @@
 import type { Request, Response } from 'express';
 import asyncHandler from 'express-async-handler';
-import { HTTP_STATUS_CODES, HTTP_MESSAGE } from '@/core/shared/constants/index.js';
+import {
+  HTTP_STATUS_CODES,
+  HTTP_MESSAGE,
+} from '@/core/shared/constants/index.js';
 import type { BaseService } from './base.service.js';
 import type { TenantScope } from './base.repository.js';
 
@@ -18,7 +21,7 @@ export abstract class BaseController<
   protected constructor(
     protected readonly service: BaseService<TSelect, TInsert>,
     protected readonly moduleName: string,
-  ) { }
+  ) {}
 
   protected scopeFrom(req: Request): TenantScope {
     return {
@@ -29,7 +32,10 @@ export abstract class BaseController<
   }
 
   list = asyncHandler(async (req: Request, res: Response) => {
-    const { page, limit, sortBy, sortDir } = req.query as Record<string, string>;
+    const { page, limit, sortBy, sortDir } = req.query as Record<
+      string,
+      string
+    >;
     const result = await this.service.paginate(
       {
         page: page ? Number(page) : undefined,
@@ -49,7 +55,10 @@ export abstract class BaseController<
   });
 
   getById = asyncHandler(async (req: Request, res: Response) => {
-    const record = await this.service.getById(req.params.id, this.scopeFrom(req));
+    const record = await this.service.getById(
+      req.params.id,
+      this.scopeFrom(req),
+    );
     res.build
       .withModule(this.moduleName)
       .withStatus(HTTP_STATUS_CODES.OK)
@@ -59,7 +68,10 @@ export abstract class BaseController<
   });
 
   create = asyncHandler(async (req: Request, res: Response) => {
-    const record = await this.service.create({ ...req.body, ...this.scopeFrom(req) });
+    const record = await this.service.create({
+      ...req.body,
+      ...this.scopeFrom(req),
+    });
     res.build
       .withModule(this.moduleName)
       .withStatus(HTTP_STATUS_CODES.CREATED)
@@ -69,7 +81,11 @@ export abstract class BaseController<
   });
 
   update = asyncHandler(async (req: Request, res: Response) => {
-    const record = await this.service.update(req.params.id, req.body, this.scopeFrom(req));
+    const record = await this.service.update(
+      req.params.id,
+      req.body,
+      this.scopeFrom(req),
+    );
     res.build
       .withModule(this.moduleName)
       .withStatus(HTTP_STATUS_CODES.OK)

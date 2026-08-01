@@ -36,9 +36,13 @@ export function issueTokens(payload: DecodedToken): TokenPair {
     expiresIn: env.JWT_ACCESS_EXPIRATION,
   } as jwt.SignOptions);
 
-  const refreshToken = jwt.sign({ userId: payload.id }, env.JWT_REFRESH_SECRET, {
-    expiresIn: env.JWT_REFRESH_EXPIRATION,
-  } as jwt.SignOptions);
+  const refreshToken = jwt.sign(
+    { userId: payload.id },
+    env.JWT_REFRESH_SECRET,
+    {
+      expiresIn: env.JWT_REFRESH_EXPIRATION,
+    } as jwt.SignOptions,
+  );
 
   return { accessToken, refreshToken };
 }
@@ -53,13 +57,17 @@ export function verifyRefreshToken(token: string): RefreshTokenPayload {
 
 // ---------- Email verification ----------
 
-export function issueEmailVerificationToken(payload: EmailVerificationPayload): string {
+export function issueEmailVerificationToken(
+  payload: EmailVerificationPayload,
+): string {
   return jwt.sign(payload, env.JWT_ACCESS_SECRET, {
     expiresIn: '24h',
   } as jwt.SignOptions);
 }
 
-export function verifyEmailVerificationToken(token: string): EmailVerificationPayload {
+export function verifyEmailVerificationToken(
+  token: string,
+): EmailVerificationPayload {
   return jwt.verify(token, env.JWT_ACCESS_SECRET) as EmailVerificationPayload;
 }
 
@@ -78,15 +86,24 @@ export function verifyPasswordResetToken(token: string): PasswordResetPayload {
 // ---------- Utilities ----------
 
 /** Decode without verifying signature/expiry — for logging or reading claims from an untrusted token */
-export function decodeTokenUnsafe<T = Record<string, unknown>>(token: string): T | null {
+export function decodeTokenUnsafe<T = Record<string, unknown>>(
+  token: string,
+): T | null {
   const decoded = jwt.decode(token);
   return decoded as T | null;
 }
 
-export function isTokenExpiredError(err: unknown): err is jwt.TokenExpiredError {
+export function isTokenExpiredError(
+  err: unknown,
+): err is jwt.TokenExpiredError {
   return err instanceof jwt.TokenExpiredError;
 }
 
-export function isTokenInvalidError(err: unknown): err is jwt.JsonWebTokenError {
-  return err instanceof jwt.JsonWebTokenError && !(err instanceof jwt.TokenExpiredError);
+export function isTokenInvalidError(
+  err: unknown,
+): err is jwt.JsonWebTokenError {
+  return (
+    err instanceof jwt.JsonWebTokenError &&
+    !(err instanceof jwt.TokenExpiredError)
+  );
 }

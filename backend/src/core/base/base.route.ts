@@ -1,7 +1,10 @@
 import { Router, type RequestHandler } from 'express';
 import { authMiddleware } from '@/core/middlewares/auth.middleware.js';
 import { requirePermission } from '@/core/middlewares/rbac.middleware.js';
-import { validate, type RequestSchema } from '@/core/middlewares/validate.middleware.js';
+import {
+  validate,
+  type RequestSchema,
+} from '@/core/middlewares/validate.middleware.js';
 import type { BaseController } from './base.controller.js';
 
 export interface CrudRouteOptions {
@@ -29,7 +32,12 @@ export function buildCrudRouter(
 
   options.extend?.(router);
 
-  router.get('/', ...guard, requirePermission(`${options.permissionKey}:read`), controller.list);
+  router.get(
+    '/',
+    ...guard,
+    requirePermission(`${options.permissionKey}:read`),
+    controller.list,
+  );
   router.get(
     '/:id',
     ...guard,

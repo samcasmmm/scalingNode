@@ -17,9 +17,9 @@ const ENV_FILE_MAP: Record<EnvType, string> = {
   [ENV_ENUMS.DEVELOPMENT]: 'env/.env.dev',
 };
 
-
 const RAW_NODE_ENV = (process.env.NODE_ENV as EnvType) || ENV_ENUMS.DEVELOPMENT;
-const ENV_FILE_PATH = ENV_FILE_MAP[RAW_NODE_ENV] ?? ENV_FILE_MAP[ENV_ENUMS.DEVELOPMENT];
+const ENV_FILE_PATH =
+  ENV_FILE_MAP[RAW_NODE_ENV] ?? ENV_FILE_MAP[ENV_ENUMS.DEVELOPMENT];
 
 dotenv.config({
   path: path.resolve(process.cwd(), ENV_FILE_PATH),
@@ -111,10 +111,7 @@ const envSchema = z.object({
   REDIS_PASSWORD: z.string().optional().default(''),
 
   // --- Security Settings ---
-  FRONTEND_URL: z
-    .string()
-    .default('')
-    .optional(),
+  FRONTEND_URL: z.string().default('').optional(),
 });
 
 // -----------------------------------------------------------------------------

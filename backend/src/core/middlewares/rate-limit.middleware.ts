@@ -1,7 +1,7 @@
-import type { Request, Response, NextFunction } from "express";
-import type { createClient } from "redis";
-import env from "../config/env.config.js";
-import { HTTP_MESSAGE } from "@/core/shared/constants/index.js";
+import type { Request, Response, NextFunction } from 'express';
+import type { createClient } from 'redis';
+import env from '../config/env.config.js';
+import { HTTP_MESSAGE } from '@/core/shared/constants/index.js';
 import { TooManyRequestsError } from '../errors/http.error.js';
 
 type RedisClient = ReturnType<typeof createClient>;
@@ -42,9 +42,13 @@ export function createRateLimiter(
 ) {
   const windowSeconds = options?.windowSeconds ?? WINDOW_SECONDS;
   const maxRequests = options?.maxRequests ?? MAX_REQUESTS;
-  const prefix = options?.prefix ?? "rate-limit";
+  const prefix = options?.prefix ?? 'rate-limit';
 
-  return async function rateLimiter(req: Request, res: Response, next: NextFunction): Promise<void> {
+  return async function rateLimiter(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
     // req.ip is only trustworthy if `trust proxy` is configured correctly
     // upstream (see security middleware) — otherwise this is spoofable via
     // X-Forwarded-For and the limiter is a no-op.
@@ -55,7 +59,7 @@ export function createRateLimiter(
 
     if (env.REDIS_ENABLED && redis?.isReady) {
       try {
-        const rawCount = await redis.sendCommand(["INCR", key]);
+        const rawCount = await redis.sendCommand(['INCR', key]);
         count = Number(rawCount);
 
         if (count === 1) {
@@ -66,7 +70,10 @@ export function createRateLimiter(
           ttlSeconds = ttl > 0 ? ttl : windowSeconds;
         }
       } catch (err) {
-        req.log?.error({ err }, "Rate limiter Redis call failed — falling back to memory");
+        req.log?.error(
+          { err },
+          'Rate limiter Redis call failed — falling back to memory',
+        );
         const resMem = handleMemoryLimit(key, windowSeconds * 1000);
         count = resMem.count;
         ttlSeconds = resMem.ttlSeconds;
@@ -77,11 +84,11 @@ export function createRateLimiter(
       ttlSeconds = resMem.ttlSeconds;
     }
 
-    res.setHeader("X-RateLimit-Limit", maxRequests);
-    res.setHeader("X-RateLimit-Remaining", Math.max(0, maxRequests - count));
+    res.setHeader('X-RateLimit-Limit', maxRequests);
+    res.setHeader('X-RateLimit-Remaining', Math.max(0, maxRequests - count));
 
     if (count > maxRequests) {
-      res.setHeader("Retry-After", ttlSeconds);
+      res.setHeader('Retry-After', ttlSeconds);
       throw new TooManyRequestsError(HTTP_MESSAGE.RATE_LIMIT.EXCEEDED);
     }
 

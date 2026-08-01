@@ -29,7 +29,9 @@
 
   "Throw ValidationError": {
     "prefix": "tev",
-    "body": ["throw new ValidationError('${1:Validation failed}', ${2:errors});"],
+    "body": [
+      "throw new ValidationError('${1:Validation failed}', ${2:errors});"
+    ],
     "description": "Throw ValidationError"
   },
 
@@ -53,19 +55,27 @@
 
   "Throw HttpError": {
     "prefix": "teh",
-    "body": ["throw new HttpError(${1:400}, '${2:Bad Request}', '${3:HTTP_ERROR}');"],
+    "body": [
+      "throw new HttpError(${1:400}, '${2:Bad Request}', '${3:HTTP_ERROR}');"
+    ],
     "description": "Throw HttpError"
   },
 
   "Throw ErrorFactory": {
     "prefix": "tef",
-    "body": ["throw ErrorFactory.create('${1|validation,notFound,unauthorized,internal|}'${2});"],
+    "body": [
+      "throw ErrorFactory.create('${1|validation,notFound,unauthorized,internal|}'${2});"
+    ],
     "description": "Throw error using ErrorFactory"
   },
 
   "ValidationError from Zod": {
     "prefix": "zerr",
-    "body": ["if (!result.success) {", "  throw ValidationError.fromZod(result.error);", "}"],
+    "body": [
+      "if (!result.success) {",
+      "  throw ValidationError.fromZod(result.error);",
+      "}"
+    ],
     "description": "Convert ZodError to ValidationError"
   }
 }

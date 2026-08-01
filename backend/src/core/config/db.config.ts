@@ -10,68 +10,68 @@ type Schema = typeof schema;
 
 @singleton()
 export class Database {
-   public readonly pool: Pool;
-   public readonly db: NodePgDatabase<Schema>;
+  public readonly pool: Pool;
+  public readonly db: NodePgDatabase<Schema>;
 
-   constructor() {
-      this.pool = new Pool(this.buildPoolConfig());
-      this.registerPoolListeners();
+  constructor() {
+    this.pool = new Pool(this.buildPoolConfig());
+    this.registerPoolListeners();
 
-      this.db = drizzle(this.pool, {
-         schema,
-         logger: !environment.PRODUCTION,
+    this.db = drizzle(this.pool, {
+      schema,
+      logger: !environment.PRODUCTION,
+    });
+  }
+
+  private buildPoolConfig(): PoolConfig {
+    return {
+      connectionString: env.DATABASE_URL,
+      max: 20,
+      min: 2,
+      idleTimeoutMillis: 30_000,
+      connectionTimeoutMillis: 5_000,
+      statement_timeout: 15_000,
+      query_timeout: 15_000,
+      ssl: environment.PRODUCTION ? { rejectUnauthorized: false } : undefined,
+    };
+  }
+
+  private registerPoolListeners(): void {
+    // Pool-level errors on idle clients would otherwise crash the process silently
+    this.pool.on('error', (err) => {
+      clog.error('[db] Unexpected error on idle client', err);
+    });
+
+    if (environment.PRODUCTION) {
+      this.pool.on('connect', () => {
+        clog.info('[db] New client connected to pool');
       });
-   }
+    }
+  }
 
-   private buildPoolConfig(): PoolConfig {
-      return {
-         connectionString: env.DATABASE_URL,
-         max: 20,
-         min: 2,
-         idleTimeoutMillis: 30_000,
-         connectionTimeoutMillis: 5_000,
-         statement_timeout: 15_000,
-         query_timeout: 15_000,
-         ssl: environment.PRODUCTION ? { rejectUnauthorized: false } : undefined,
-      };
-   }
-
-   private registerPoolListeners(): void {
-      // Pool-level errors on idle clients would otherwise crash the process silently
-      this.pool.on('error', (err) => {
-         clog.error('[db] Unexpected error on idle client', err);
-      });
-
-      if (environment.PRODUCTION) {
-         this.pool.on('connect', () => {
-            clog.info('[db] New client connected to pool');
-         });
-      }
-   }
-
-   async checkHealth(): Promise<boolean> {
+  async checkHealth(): Promise<boolean> {
+    try {
+      const client = await this.pool.connect();
       try {
-         const client = await this.pool.connect();
-         try {
-            await client.query('SELECT 1');
-            return true;
-         } finally {
-            client.release();
-         }
-      } catch (err) {
-         clog.error('[db] Health check failed', err);
-         return false;
+        await client.query('SELECT 1');
+        return true;
+      } finally {
+        client.release();
       }
-   }
+    } catch (err) {
+      clog.error('[db] Health check failed', err);
+      return false;
+    }
+  }
 
-   async close(): Promise<void> {
-      try {
-         await this.pool.end();
-         clog.success('[db] Pool closed gracefully');
-      } catch (err) {
-         clog.error('[db] Error closing pool', err);
-      }
-   }
+  async close(): Promise<void> {
+    try {
+      await this.pool.end();
+      clog.success('[db] Pool closed gracefully');
+    } catch (err) {
+      clog.error('[db] Error closing pool', err);
+    }
+  }
 }
 
 // Module-level singleton instance, so files that just want `db`/`pool`

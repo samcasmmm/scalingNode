@@ -43,7 +43,7 @@ export abstract class BaseRepository<
 > {
   protected readonly db = db;
 
-  protected constructor(protected readonly table: TTable) { }
+  protected constructor(protected readonly table: TTable) {}
 
   protected get idColumn(): PgColumn {
     return (this.table as any).id;
@@ -61,10 +61,12 @@ export abstract class BaseRepository<
     if (!scope) return undefined;
     const clauses: SQL[] = [];
     const cols = this.table as any;
-    if (scope.tenantId && cols.tenantId) clauses.push(eq(cols.tenantId, scope.tenantId));
+    if (scope.tenantId && cols.tenantId)
+      clauses.push(eq(cols.tenantId, scope.tenantId));
     if (scope.organizationId && cols.organizationId)
       clauses.push(eq(cols.organizationId, scope.organizationId));
-    if (scope.branchId && cols.branchId) clauses.push(eq(cols.branchId, scope.branchId));
+    if (scope.branchId && cols.branchId)
+      clauses.push(eq(cols.branchId, scope.branchId));
     return clauses.length ? and(...clauses) : undefined;
   }
 
@@ -75,9 +77,14 @@ export abstract class BaseRepository<
   }
 
   async findAll(scope?: TenantScope): Promise<TSelect[]> {
-    const where = this.combine(this.notDeletedClause(), this.scopeClause(scope));
+    const where = this.combine(
+      this.notDeletedClause(),
+      this.scopeClause(scope),
+    );
     const query = db.select().from(this.table as any);
-    return (where ? query.where(where) : query) as unknown as Promise<TSelect[]>;
+    return (where ? query.where(where) : query) as unknown as Promise<
+      TSelect[]
+    >;
   }
 
   async paginate(
@@ -87,9 +94,14 @@ export abstract class BaseRepository<
     const page = Math.max(1, params.page ?? 1);
     const limit = Math.min(100, Math.max(1, params.limit ?? 20));
     const offset = (page - 1) * limit;
-    const where = this.combine(this.notDeletedClause(), this.scopeClause(scope));
+    const where = this.combine(
+      this.notDeletedClause(),
+      this.scopeClause(scope),
+    );
 
-    const sortCol: PgColumn = params.sortBy ? (this.table as any)[params.sortBy] : this.idColumn;
+    const sortCol: PgColumn = params.sortBy
+      ? (this.table as any)[params.sortBy]
+      : this.idColumn;
     const orderBy = params.sortDir === 'asc' ? asc(sortCol) : desc(sortCol);
 
     let query = db
@@ -111,11 +123,19 @@ export abstract class BaseRepository<
     const total = countRows.length;
     return {
       data: rows as unknown as TSelect[],
-      meta: { page, limit, total, totalPages: Math.max(1, Math.ceil(total / limit)) },
+      meta: {
+        page,
+        limit,
+        total,
+        totalPages: Math.max(1, Math.ceil(total / limit)),
+      },
     };
   }
 
-  async findById(id: string | number, scope?: TenantScope): Promise<TSelect | null> {
+  async findById(
+    id: string | number,
+    scope?: TenantScope,
+  ): Promise<TSelect | null> {
     const where = this.combine(
       eq(this.idColumn, id as any),
       this.notDeletedClause(),
@@ -130,7 +150,11 @@ export abstract class BaseRepository<
   }
 
   async findOne(clause: SQL, scope?: TenantScope): Promise<TSelect | null> {
-    const where = this.combine(clause, this.notDeletedClause(), this.scopeClause(scope));
+    const where = this.combine(
+      clause,
+      this.notDeletedClause(),
+      this.scopeClause(scope),
+    );
     const [row] = await db
       .select()
       .from(this.table as any)
@@ -140,7 +164,11 @@ export abstract class BaseRepository<
   }
 
   async findMany(clause: SQL, scope?: TenantScope): Promise<TSelect[]> {
-    const where = this.combine(clause, this.notDeletedClause(), this.scopeClause(scope));
+    const where = this.combine(
+      clause,
+      this.notDeletedClause(),
+      this.scopeClause(scope),
+    );
     return db
       .select()
       .from(this.table as any)
@@ -160,7 +188,10 @@ export abstract class BaseRepository<
     data: Partial<TInsert>,
     scope?: TenantScope,
   ): Promise<TSelect | null> {
-    const where = this.combine(eq(this.idColumn, id as any), this.scopeClause(scope));
+    const where = this.combine(
+      eq(this.idColumn, id as any),
+      this.scopeClause(scope),
+    );
     const [row] = await db
       .update(this.table as any)
       .set(data as any)
@@ -170,7 +201,10 @@ export abstract class BaseRepository<
   }
 
   async deleteById(id: string | number, scope?: TenantScope): Promise<boolean> {
-    const where = this.combine(eq(this.idColumn, id as any), this.scopeClause(scope));
+    const where = this.combine(
+      eq(this.idColumn, id as any),
+      this.scopeClause(scope),
+    );
     if (this.deletedAtColumn) {
       const [row] = await db
         .update(this.table as any)
@@ -186,8 +220,14 @@ export abstract class BaseRepository<
     return deleted.length > 0;
   }
 
-  async hardDeleteById(id: string | number, scope?: TenantScope): Promise<boolean> {
-    const where = this.combine(eq(this.idColumn, id as any), this.scopeClause(scope));
+  async hardDeleteById(
+    id: string | number,
+    scope?: TenantScope,
+  ): Promise<boolean> {
+    const where = this.combine(
+      eq(this.idColumn, id as any),
+      this.scopeClause(scope),
+    );
     const deleted = (await db
       .delete(this.table as any)
       .where(where!)

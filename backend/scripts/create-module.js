@@ -22,7 +22,9 @@ function cleanInput(str) {
 
 function toPascalCase(input) {
   const clean = cleanInput(input);
-  return clean.replace(/[-_\s]+(.)?/g, (_, c) => (c ? c.toUpperCase() : '')).replace(/^(.)/, (c) => c.toUpperCase());
+  return clean
+    .replace(/[-_\s]+(.)?/g, (_, c) => (c ? c.toUpperCase() : ''))
+    .replace(/^(.)/, (c) => c.toUpperCase());
 }
 
 function toCamelCase(input) {
@@ -64,7 +66,8 @@ async function main() {
       {
         type: 'input',
         name: 'entityName',
-        message: 'Entity name, singular, PascalCase (e.g. Payroll, Invoice, Lead):',
+        message:
+          'Entity name, singular, PascalCase (e.g. Payroll, Invoice, Lead):',
         when: !entityName,
         validate: (v) => (v.trim().length > 0 ? true : 'Required'),
       },
@@ -78,7 +81,8 @@ async function main() {
       {
         type: 'confirm',
         name: 'tenantScoped',
-        message: 'Does this entity belong to a tenant (tenantId column + scoping)?',
+        message:
+          'Does this entity belong to a tenant (tenantId column + scoping)?',
         default: true,
         when: !flags.includes('--tenant') && !flags.includes('--no-tenant'),
       },
@@ -87,7 +91,9 @@ async function main() {
         name: 'softDelete',
         message: 'Enable soft delete (deletedAt column)?',
         default: true,
-        when: !flags.includes('--soft-delete') && !flags.includes('--no-soft-delete'),
+        when:
+          !flags.includes('--soft-delete') &&
+          !flags.includes('--no-soft-delete'),
       },
     ]);
 
@@ -105,14 +111,23 @@ async function main() {
   const tableName = `${entitySnake}s`;
   const permissionKey = `${group}.${entitySnake}`;
 
-  const moduleDir = path.resolve(process.cwd(), 'src/modules', group, entitySnake.replace(/_/g, '-'));
+  const moduleDir = path.resolve(
+    process.cwd(),
+    'src/modules',
+    group,
+    entitySnake.replace(/_/g, '-'),
+  );
   fs.mkdirSync(moduleDir, { recursive: true });
 
   const files = {};
 
   // --- Schema -------------------------------------------------------------
   if (createSchema) {
-    const schemaDir = path.resolve(process.cwd(), 'src/database/schema/modules', group);
+    const schemaDir = path.resolve(
+      process.cwd(),
+      'src/database/schema/modules',
+      group,
+    );
     fs.mkdirSync(schemaDir, { recursive: true });
 
     files[`${schemaDir}/${entitySnake}.schema.ts`] =
@@ -135,10 +150,16 @@ export type New${Entity} = typeof ${entity}sTable.$inferInsert;
 `;
   }
 
-  const repoGenerics = createSchema ? `<typeof ${entity}sTable, ${Entity}, New${Entity}>` : `<any, any, any>`;
+  const repoGenerics = createSchema
+    ? `<typeof ${entity}sTable, ${Entity}, New${Entity}>`
+    : `<any, any, any>`;
   const repoSuper = createSchema ? `${entity}sTable` : `null as any`;
-  const serviceGenerics = createSchema ? `<${Entity}, New${Entity}>` : `<any, any>`;
-  const controllerGenerics = createSchema ? `<${Entity}, New${Entity}>` : `<any, any>`;
+  const serviceGenerics = createSchema
+    ? `<${Entity}, New${Entity}>`
+    : `<any, any>`;
+  const controllerGenerics = createSchema
+    ? `<${Entity}, New${Entity}>`
+    : `<any, any>`;
   const schemaImport = createSchema
     ? `import { ${entity}sTable, type ${Entity}, type New${Entity} } from '@/database/schema/modules/${group}/${entitySnake}.schema.js';\n`
     : '';
@@ -147,7 +168,8 @@ export type New${Entity} = typeof ${entity}sTable.$inferInsert;
     : '';
 
   // --- Repository -----------------------------------------------------------
-  files[`${moduleDir}/${entitySnake}.repository.ts`] = `import { injectable } from 'tsyringe';
+  files[`${moduleDir}/${entitySnake}.repository.ts`] =
+    `import { injectable } from 'tsyringe';
 ${schemaImport}import { BaseRepository } from '@/core/base/base.repository.js';
 
 /**
@@ -169,7 +191,8 @@ export class ${Entity}Repository extends BaseRepository${repoGenerics} {
 `;
 
   // --- Service --------------------------------------------------------------
-  files[`${moduleDir}/${entitySnake}.service.ts`] = `import { inject, injectable } from 'tsyringe';
+  files[`${moduleDir}/${entitySnake}.service.ts`] =
+    `import { inject, injectable } from 'tsyringe';
 import { BaseService } from '@/core/base/base.service.js';
 ${schemaTypeImport}import { ${Entity}Repository } from './${entitySnake}.repository.js';
 
@@ -189,7 +212,8 @@ export class ${Entity}Service extends BaseService${serviceGenerics} {
 `;
 
   // --- Controller -----------------------------------------------------------
-  files[`${moduleDir}/${entitySnake}.controller.ts`] = `import { inject, injectable } from 'tsyringe';
+  files[`${moduleDir}/${entitySnake}.controller.ts`] =
+    `import { inject, injectable } from 'tsyringe';
 import { BaseController } from '@/core/base/base.controller.js';
 ${schemaTypeImport}import { ${Entity}Service } from './${entitySnake}.service.js';
 
@@ -228,7 +252,8 @@ export const update${Entity}Schema = create${Entity}Schema.partial();
 `;
 
   // --- Routes -----------------------------------------------------------------
-  files[`${moduleDir}/${entitySnake}.routes.ts`] = `import { Router } from 'express';
+  files[`${moduleDir}/${entitySnake}.routes.ts`] =
+    `import { Router } from 'express';
 import { container } from 'tsyringe';
 import { buildCrudRouter } from '@/core/base/base.route.js';
 import { create${Entity}Schema, update${Entity}Schema } from './${entitySnake}.validation.js';
@@ -260,11 +285,17 @@ export default router;
   for (const [filePath, content] of Object.entries(files)) {
     fs.mkdirSync(path.dirname(filePath), { recursive: true });
     if (fs.existsSync(filePath)) {
-      console.log(chalk.yellow(`  skip (exists): ${path.relative(process.cwd(), filePath)}`));
+      console.log(
+        chalk.yellow(
+          `  skip (exists): ${path.relative(process.cwd(), filePath)}`,
+        ),
+      );
       continue;
     }
     fs.writeFileSync(filePath, content, 'utf8');
-    console.log(chalk.green(`  created: ${path.relative(process.cwd(), filePath)}`));
+    console.log(
+      chalk.green(`  created: ${path.relative(process.cwd(), filePath)}`),
+    );
   }
 
   const moduleRelPath = `./${group}/${entitySnake.replace(/_/g, '-')}/${entitySnake}`;

@@ -67,7 +67,7 @@ class ResponseBuilder {
     const activeModule =
       this.moduleName !== 'no module'
         ? this.moduleName
-        : (this.res.req as any)?.moduleName ?? 'no module';
+        : ((this.res.req as any)?.moduleName ?? 'no module');
 
     const base = {
       success: this.isSuccess,

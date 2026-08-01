@@ -4,32 +4,38 @@
 export const PLATFORM_ROLES = [
   {
     name: 'SUPER_ADMIN',
-    description: 'Full platform administrative control and system management access',
+    description:
+      'Full platform administrative control and system management access',
     isSystem: true,
   },
   {
     name: 'PLATFORM_ADMIN',
-    description: 'Manage tenants, subscriptions, module entitlements, and pricing plans',
+    description:
+      'Manage tenants, subscriptions, module entitlements, and pricing plans',
     isSystem: true,
   },
   {
     name: 'SUPPORT',
-    description: 'Customer support operations and tenant session impersonation access',
+    description:
+      'Customer support operations and tenant session impersonation access',
     isSystem: true,
   },
   {
     name: 'BILLING_ADMIN',
-    description: 'Manage platform billing, invoices, payments, and subscription accounting',
+    description:
+      'Manage platform billing, invoices, payments, and subscription accounting',
     isSystem: true,
   },
   {
     name: 'DEVELOPER',
-    description: 'Internal platform development, API testing, and integration maintenance',
+    description:
+      'Internal platform development, API testing, and integration maintenance',
     isSystem: true,
   },
   {
     name: 'AUDITOR',
-    description: 'Read-only platform-wide audit log and compliance review access',
+    description:
+      'Read-only platform-wide audit log and compliance review access',
     isSystem: true,
   },
 ] as const;
@@ -40,27 +46,32 @@ export const PLATFORM_ROLES = [
 export const TENANT_ROLES = [
   {
     name: 'OWNER',
-    description: 'Organization owner (created during registration with full tenant rights)',
+    description:
+      'Organization owner (created during registration with full tenant rights)',
     isSystem: true,
   },
   {
     name: 'SUPER_ADMIN',
-    description: 'Full access to all tenant modules, settings, and business data',
+    description:
+      'Full access to all tenant modules, settings, and business data',
     isSystem: true,
   },
   {
     name: 'ADMIN',
-    description: 'Manage users, roles, permissions, modules, and workspace settings',
+    description:
+      'Manage users, roles, permissions, modules, and workspace settings',
     isSystem: true,
   },
   {
     name: 'MANAGER',
-    description: 'Department or team manager with approval and team management rights',
+    description:
+      'Department or team manager with approval and team management rights',
     isSystem: false,
   },
   {
     name: 'SUPERVISOR',
-    description: 'Team lead with limited management and operational supervision permissions',
+    description:
+      'Team lead with limited management and operational supervision permissions',
     isSystem: false,
   },
   {
@@ -75,7 +86,8 @@ export const TENANT_ROLES = [
   },
   {
     name: 'ACCOUNTANT',
-    description: 'Finance, general ledger, tax, invoicing, and accounting operations',
+    description:
+      'Finance, general ledger, tax, invoicing, and accounting operations',
     isSystem: false,
   },
   {
@@ -90,7 +102,8 @@ export const TENANT_ROLES = [
   },
   {
     name: 'INVENTORY_MANAGER',
-    description: 'Warehouse, stock levels, product catalog, and inventory operations',
+    description:
+      'Warehouse, stock levels, product catalog, and inventory operations',
     isSystem: false,
   },
   {
@@ -110,7 +123,8 @@ export const TENANT_ROLES = [
   },
   {
     name: 'CUSTOM',
-    description: 'Tenant-defined custom role with customizable permission scope',
+    description:
+      'Tenant-defined custom role with customizable permission scope',
     isSystem: false,
   },
 ] as const;

@@ -25,11 +25,10 @@ export class AppError extends Error {
     this.timestamp = new Date().toISOString();
 
     Object.setPrototypeOf(this, new.target.prototype);
-    if (typeof Error.captureStackTrace === "function") {
+    if (typeof Error.captureStackTrace === 'function') {
       Error.captureStackTrace(this, this.constructor);
     }
   }
-
 
   toJSON(): Record<string, unknown> {
     return {
@@ -44,7 +43,12 @@ export class AppError extends Error {
   }
 }
 export class DomainError extends AppError {
-  constructor(message: string, code: string = "DOMAIN_ERROR", statusCode: number = 400, extra: ErrorExtra = {}) {
+  constructor(
+    message: string,
+    code: string = 'DOMAIN_ERROR',
+    statusCode: number = 400,
+    extra: ErrorExtra = {},
+  ) {
     super(message, statusCode, code, true, extra);
   }
 }

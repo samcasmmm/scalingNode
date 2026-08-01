@@ -53,8 +53,7 @@ export abstract class BaseMapper<
   TResponseDto,
   TCreateDto extends object = Partial<InsertOf<TTable>>,
   TUpdateDto extends object = Partial<TCreateDto>,
-> implements IMapper<TTable, TResponseDto, TCreateDto, TUpdateDto>
-{
+> implements IMapper<TTable, TResponseDto, TCreateDto, TUpdateDto> {
   /** The single method every concrete mapper MUST implement: entity -> API-safe DTO. */
   abstract toResponse(entity: EntityOf<TTable>): TResponseDto;
 

@@ -25,7 +25,10 @@ export abstract class BaseService<
     return this.repository.findAll(scope);
   }
 
-  async paginate(params: PaginationParams, scope?: TenantScope): Promise<PaginatedResult<TSelect>> {
+  async paginate(
+    params: PaginationParams,
+    scope?: TenantScope,
+  ): Promise<PaginatedResult<TSelect>> {
     return this.repository.paginate(params, scope);
   }
 
@@ -39,7 +42,11 @@ export abstract class BaseService<
     return this.repository.create(data);
   }
 
-  async update(id: string | number, data: Partial<TInsert>, scope?: TenantScope): Promise<TSelect> {
+  async update(
+    id: string | number,
+    data: Partial<TInsert>,
+    scope?: TenantScope,
+  ): Promise<TSelect> {
     await this.getById(id, scope);
     const updated = await this.repository.updateById(id, data, scope);
     if (!updated) throw new NotFoundError(this.resourceName);
