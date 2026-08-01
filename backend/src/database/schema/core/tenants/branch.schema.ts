@@ -25,7 +25,7 @@ export const branchesTable = pgTable(
       ),
 
       name: varchar('name', { length: 255 }).notNull(),
-      type: officeTypeEnum('type').default('BRANCH').notNull(),
+      type: officeTypeEnum('type').default('branch').notNull(),
       code: varchar('code', { length: 255 }),
 
       address: text('address'),
@@ -47,12 +47,12 @@ export const branchesTable = pgTable(
 
       version: versionColumn(),
    },
-   (table) => ({
-      tenantIdx: index('branches_tenant_idx').on(table.tenantId),
-      orgIdx: index('branches_org_idx').on(table.organizationId),
-      typeIdx: index('branches_type_idx').on(table.type),
-      codeIdx: index('branches_code_idx').on(table.code),
-   })
+   (table) => [
+      index('branches_tenant_idx').on(table.tenantId),
+      index('branches_org_idx').on(table.organizationId),
+      index('branches_type_idx').on(table.type),
+      index('branches_code_idx').on(table.code),
+   ]
 );
 
 export const branchesRelations = relations(branchesTable, ({ one, many }) => ({

@@ -34,12 +34,12 @@ export const teamsTable = pgTable(
 
       version: versionColumn(),
    },
-   (t) => ({
-      tenantIdx: index('teams_tenant_idx').on(t.tenantId),
-      orgIdx: index('teams_org_idx').on(t.organizationId),
-      leadIdx: index('teams_lead_user_idx').on(t.leadUserId),
-      nameIdx: index('teams_name_idx').on(t.name),
-   })
+   (t) => [
+      index('teams_tenant_idx').on(t.tenantId),
+      index('teams_org_idx').on(t.organizationId),
+      index('teams_lead_user_idx').on(t.leadUserId),
+      index('teams_name_idx').on(t.name),
+   ]
 );
 
 export const teamsRelations = relations(teamsTable, ({ one, many }) => ({

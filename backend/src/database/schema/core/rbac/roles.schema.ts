@@ -17,9 +17,9 @@ export const rolesTable = pgTable(
       isSystem: boolean('is_system').default(false).notNull(),
       isActive: flagColumn('is_active'),
    },
-   (t) => ({
-      tenantIdx: index('roles_tenant_idx').on(t.tenantId),
-   })
+   (t) => [
+      index('roles_tenant_idx').on(t.tenantId),
+   ]
 );
 
 export const rolesRelations = relations(rolesTable, ({ one }) => ({

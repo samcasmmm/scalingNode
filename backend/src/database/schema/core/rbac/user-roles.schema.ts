@@ -27,10 +27,10 @@ export const userRolesTable = pgTable(
 
       createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
    },
-   (t) => ({
-      userIdx: index('user_roles_user_idx').on(t.userId),
-      roleIdx: index('user_roles_role_idx').on(t.roleId),
-   })
+   (t) => [
+      index('user_roles_user_idx').on(t.userId),
+      index('user_roles_role_idx').on(t.roleId),
+   ]
 );
 
 export const userRolesRelations = relations(userRolesTable, ({ one }) => ({

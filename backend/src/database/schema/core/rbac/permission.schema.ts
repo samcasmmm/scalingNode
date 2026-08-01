@@ -13,9 +13,9 @@ export const permissionsTable = pgTable(
       name: varchar('name', { length: 150 }).notNull(),
       description: text('description'),
    },
-   (t) => ({
-      keyIdx: uniqueIndex('permissions_key_idx').on(t.key),
-   })
+   (t) => [
+      uniqueIndex('permissions_key_idx').on(t.key),
+   ]
 );
 
 export const permissionsRelations = relations(permissionsTable, () => ({}));

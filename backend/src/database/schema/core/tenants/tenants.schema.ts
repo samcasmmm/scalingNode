@@ -29,11 +29,11 @@ export const tenantsTable = pgTable(
 
       version: versionColumn(),
    },
-   (table) => ({
-      slugIdx: uniqueIndex('tenant_slug_idx').on(table.slug),
-      domainIdx: uniqueIndex('tenant_domain_idx').on(table.domain),
-      statusIdx: index('tenant_status_idx').on(table.status),
-   })
+   (table) => [
+      uniqueIndex('tenant_slug_idx').on(table.slug),
+      uniqueIndex('tenant_domain_idx').on(table.domain),
+      index('tenant_status_idx').on(table.status),
+   ]
 );
 
 export const tenantsRelations = relations(tenantsTable, ({ many }) => ({

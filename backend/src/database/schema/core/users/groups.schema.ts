@@ -22,10 +22,10 @@ export const groupsTable = pgTable(
 
       version: versionColumn(),
    },
-   (t) => ({
-      tenantIdx: index('groups_tenant_idx').on(t.tenantId),
-      nameIdx: index('groups_name_idx').on(t.name),
-   }),
+   (t) => [
+      index('groups_tenant_idx').on(t.tenantId),
+      index('groups_name_idx').on(t.name),
+   ],
 );
 
 export const groupsRelations = relations(groupsTable, ({ one, many }) => ({

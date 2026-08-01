@@ -16,11 +16,11 @@ export const groupMembersTable = pgTable(
 
       joinedAt: timestamp('joined_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
    },
-   (t) => ({
-      pk: primaryKey({ columns: [t.groupId, t.userId] }),
-      groupIdx: index('group_members_group_idx').on(t.groupId),
-      userIdx: index('group_members_user_idx').on(t.userId),
-   })
+   (t) => [
+      primaryKey({ columns: [t.groupId, t.userId] }),
+      index('group_members_group_idx').on(t.groupId),
+      index('group_members_user_idx').on(t.userId),
+   ]
 );
 
 export const groupMembersRelations = relations(groupMembersTable, ({ one }) => ({

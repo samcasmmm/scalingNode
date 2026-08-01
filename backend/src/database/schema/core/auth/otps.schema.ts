@@ -1,10 +1,10 @@
 import { relations } from 'drizzle-orm';
-import { type AnyPgColumn, bigint, index, integer, pgTable, text, timestamp, varchar } from 'drizzle-orm/pg-core';
-import { idColumn, timestamps } from '@/database/schema/core/_shared.columns.js';
+import { type AnyPgColumn, bigint, index, integer, pgTable, timestamp, varchar } from 'drizzle-orm/pg-core';
+import { idColumn } from '@/database/schema/core/_shared.columns.js';
 import { otpPurposeEnum } from '@/database/schema/core/_core.enum.js';
 import { usersTable } from '@/database/index.js';
 
-/** OTPs — one-time passcodes for login/verification, channel-agnostic. */
+/** One-Time Passwords — email/SMS OTP challenges. */
 export const otpsTable = pgTable(
    'otps',
    {
@@ -14,19 +14,18 @@ export const otpsTable = pgTable(
          onDelete: 'cascade',
       }),
 
-      destination: varchar('destination', { length: 255 }).notNull(),
-      codeHash: text('code_hash').notNull(),
+      codeHash: varchar('code_hash', { length: 255 }).notNull(),
       purpose: otpPurposeEnum('purpose').notNull(),
-      attempts: integer('attempts').default(0).notNull(),
-      consumedAt: timestamp('consumed_at', { mode: 'date', withTimezone: true }),
       expiresAt: timestamp('expires_at', { mode: 'date', withTimezone: true }).notNull(),
-
-      ...timestamps(),
+      attempts: integer('attempts').default(0).notNull(),
+      maxAttempts: integer('max_attempts').default(5).notNull(),
+      consumedAt: timestamp('consumed_at', { mode: 'date', withTimezone: true }),
+      createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
    },
-   (t) => ({
-      destinationIdx: index('otps_destination_idx').on(t.destination),
-      userIdx: index('otps_user_idx').on(t.userId),
-   }),
+   (t) => [
+      index('otps_user_idx').on(t.userId),
+      index('otps_purpose_idx').on(t.purpose),
+   ],
 );
 
 export const otpsRelations = relations(otpsTable, ({ one }) => ({

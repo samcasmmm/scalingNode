@@ -48,6 +48,31 @@ export const dataScopeTypeEnum = pgEnum('data_scope_type', [
 ]);
 
 
+// subscription enums
+export const subscriptionStatusEnum = pgEnum('subscription_status', [
+   'trialing',
+   'active',
+   'past_due',
+   'cancelled',
+   'expired',
+]);
+
+export const invoiceStatusEnum = pgEnum('invoice_status', [
+   'draft',
+   'open',
+   'paid',
+   'void',
+   'uncollectible',
+]);
+
+export const paymentStatusEnum = pgEnum('payment_status', [
+   'pending',
+   'succeeded',
+   'failed',
+   'refunded',
+]);
+
+
 // tenant enums
 export const tenantStatusEnum = pgEnum('tenant_status', [
    'trial',

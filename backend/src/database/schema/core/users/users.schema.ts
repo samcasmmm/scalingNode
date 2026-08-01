@@ -1,7 +1,16 @@
 import { relations } from 'drizzle-orm';
-import { type AnyPgColumn, bigint, boolean, index, pgTable, text, varchar } from 'drizzle-orm/pg-core';
-import { auditActorColumns, baseColumns, flagColumn, versionColumn } from '@/database/schema/core/_shared.columns.js';
-
+import {
+   type AnyPgColumn,
+   bigint, boolean,
+   index, pgTable,
+   text, varchar
+} from 'drizzle-orm/pg-core';
+import {
+   auditActorColumns,
+   baseColumns,
+   versionColumn
+} from '@/database/schema/core/_shared.columns.js';
+import { accountStatusEnum } from '@/database/schema/core/_core.enum.js';
 import {
    tenantsTable,
    organizationsTable,
@@ -9,7 +18,6 @@ import {
    workspacesTable,
    teamMembersTable,
    groupMembersTable,
-   accountStatusEnum,
 } from '@/database/index.js';
 
 export const usersTable = pgTable(
@@ -41,17 +49,16 @@ export const usersTable = pgTable(
       }),
 
       accountStatus: accountStatusEnum('account_status').default('pending').notNull(),
-
       version: versionColumn(),
 
       ...auditActorColumns((): AnyPgColumn => usersTable.id),
    },
-   (table) => ({
-      tenantIdx: index('users_tenant_idx').on(table.tenantId),
-      orgIdx: index('users_org_idx').on(table.organizationId),
-      branchIdx: index('users_branch_idx').on(table.branchId),
-      emailIdx: index('users_email_idx').on(table.email),
-   })
+   (table) => [
+      index('users_tenant_idx').on(table.tenantId),
+      index('users_org_idx').on(table.organizationId),
+      index('users_branch_idx').on(table.branchId),
+      index('users_email_idx').on(table.email),
+   ]
 );
 
 export const usersRelations = relations(usersTable, ({ one, many }) => ({

@@ -3,7 +3,7 @@ import { type AnyPgColumn, bigint, index, pgTable, text, timestamp, varchar } fr
 import { idColumn } from '@/database/schema/core/_shared.columns.js';
 import { tenantsTable, usersTable } from '@/database/index.js';
 
-/** Change History — field-level before/after diff, useful for entities needing granular rollback/compliance trails. */
+/** Change History — field-level before/after diff. */
 export const changeHistoryTable = pgTable(
    'change_history',
    {
@@ -24,11 +24,11 @@ export const changeHistoryTable = pgTable(
       newValue: text('new_value'),
       createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
    },
-   (t) => ({
-      tenantIdx: index('change_history_tenant_idx').on(t.tenantId),
-      entityIdx: index('change_history_entity_idx').on(t.entityType, t.entityId),
-      actorIdx: index('change_history_actor_idx').on(t.actorUserId),
-   })
+   (t) => [
+      index('change_history_tenant_idx').on(t.tenantId),
+      index('change_history_entity_idx').on(t.entityType, t.entityId),
+      index('change_history_actor_idx').on(t.actorUserId),
+   ]
 );
 
 export const changeHistoryRelations = relations(changeHistoryTable, ({ one }) => ({

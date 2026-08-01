@@ -19,9 +19,9 @@ export const moduleAccessTable = pgTable(
       expiresAt: timestamp('expires_at', { mode: 'date', withTimezone: true }),
       sourceSubscriptionId: bigint('source_subscription_id', { mode: 'number' }),
    },
-   (t) => ({
-      tenantModuleIdx: uniqueIndex('module_access_tenant_module_idx').on(t.tenantId, t.moduleKey),
-   })
+   (t) => [
+      uniqueIndex('module_access_tenant_module_idx').on(t.tenantId, t.moduleKey),
+   ]
 );
 
 export const moduleAccessRelations = relations(moduleAccessTable, ({ one }) => ({

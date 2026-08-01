@@ -24,11 +24,11 @@ export const loginLogsTable = pgTable(
       userAgent: text('user_agent'),
       createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
    },
-   (t) => ({
-      tenantIdx: index('login_logs_tenant_idx').on(t.tenantId),
-      userIdx: index('login_logs_user_idx').on(t.userId),
-      emailIdx: index('login_logs_email_idx').on(t.email),
-   })
+   (t) => [
+      index('login_logs_tenant_idx').on(t.tenantId),
+      index('login_logs_user_idx').on(t.userId),
+      index('login_logs_email_idx').on(t.email),
+   ]
 );
 
 export const loginLogsRelations = relations(loginLogsTable, ({ one }) => ({

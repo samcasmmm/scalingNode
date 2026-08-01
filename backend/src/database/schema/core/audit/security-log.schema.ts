@@ -3,7 +3,7 @@ import { type AnyPgColumn, bigint, index, jsonb, pgTable, timestamp, varchar } f
 import { idColumn } from '@/database/schema/core/_shared.columns.js';
 import { tenantsTable, usersTable } from '@/database/index.js';
 
-/** Security Logs — sensitive security events (MFA changes, permission escalation, API key creation, ...). */
+/** Security Logs — sensitive security events. */
 export const securityLogsTable = pgTable(
    'security_logs',
    {
@@ -23,10 +23,10 @@ export const securityLogsTable = pgTable(
       ipAddress: varchar('ip_address', { length: 60 }),
       createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
    },
-   (t) => ({
-      tenantIdx: index('security_logs_tenant_idx').on(t.tenantId),
-      actorIdx: index('security_logs_actor_idx').on(t.actorUserId),
-   })
+   (t) => [
+      index('security_logs_tenant_idx').on(t.tenantId),
+      index('security_logs_actor_idx').on(t.actorUserId),
+   ]
 );
 
 export const securityLogsRelations = relations(securityLogsTable, ({ one }) => ({

@@ -13,9 +13,9 @@ export const modulesCatalogTable = pgTable(
       description: text('description'),
       isCore: boolean('is_core').default(false).notNull(),
    },
-   (t) => ({
-      keyIdx: uniqueIndex('modules_catalog_key_idx').on(t.key),
-   })
+   (t) => [
+      uniqueIndex('modules_catalog_key_idx').on(t.key),
+   ]
 );
 
 export const modulesCatalogRelations = relations(modulesCatalogTable, () => ({}));

@@ -37,11 +37,11 @@ export const businessUnitsTable = pgTable(
 
       version: versionColumn(),
    },
-   (table) => ({
-      tenantIdx: index('bu_tenant_idx').on(table.tenantId),
-      orgIdx: index('bu_org_idx').on(table.organizationId),
-      codeIdx: index('bu_code_idx').on(table.code),
-   })
+   (table) => [
+      index('bu_tenant_idx').on(table.tenantId),
+      index('bu_org_idx').on(table.organizationId),
+      index('bu_code_idx').on(table.code),
+   ]
 );
 
 export const businessUnitsRelations = relations(businessUnitsTable, ({ one, many }) => ({

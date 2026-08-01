@@ -50,14 +50,14 @@ export const departmentsTable = pgTable(
 
       version: versionColumn(),
    },
-   (t) => ({
-      tenantIdx: index('departments_tenant_idx').on(t.tenantId),
-      orgIdx: index('departments_org_idx').on(t.organizationId),
-      branchIdx: index('departments_branch_idx').on(t.branchId),
-      buIdx: index('departments_business_unit_idx').on(t.businessUnitId),
-      parentIdx: index('departments_parent_idx').on(t.parentDepartmentId),
-      tenantCodeUq: uniqueIndex('departments_tenant_code_uq').on(t.tenantId, t.code),
-   }),
+   (t) => [
+      index('departments_tenant_idx').on(t.tenantId),
+      index('departments_org_idx').on(t.organizationId),
+      index('departments_branch_idx').on(t.branchId),
+      index('departments_business_unit_idx').on(t.businessUnitId),
+      index('departments_parent_idx').on(t.parentDepartmentId),
+      uniqueIndex('departments_tenant_code_uq').on(t.tenantId, t.code),
+   ],
 );
 
 export const departmentsRelations = relations(departmentsTable, ({ one, many }) => ({

@@ -13,9 +13,9 @@ export const groupRolesTable = pgTable(
          .notNull()
          .references((): AnyPgColumn => rolesTable.id, { onDelete: 'cascade' }),
    },
-   (t) => ({
-      pk: primaryKey({ columns: [t.groupId, t.roleId] }),
-   })
+   (t) => [
+      primaryKey({ columns: [t.groupId, t.roleId] }),
+   ]
 );
 
 export const groupRolesRelations = relations(groupRolesTable, ({ one }) => ({

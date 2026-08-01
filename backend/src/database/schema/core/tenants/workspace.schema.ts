@@ -49,14 +49,14 @@ export const workspacesTable = pgTable(
 
       version: versionColumn(),
    },
-   (table) => ({
-      tenantSlugIdx: uniqueIndex('workspace_tenant_slug_idx').on(table.tenantId, table.slug),
-      tenantIdx: index('workspaces_tenant_idx').on(table.tenantId),
-      orgIdx: index('workspaces_org_idx').on(table.organizationId),
-      branchIdx: index('workspaces_branch_idx').on(table.branchId),
-      buIdx: index('workspaces_bu_idx').on(table.businessUnitId),
-      ownerIdx: index('workspaces_owner_idx').on(table.ownerId),
-   })
+   (table) => [
+      uniqueIndex('workspace_tenant_slug_idx').on(table.tenantId, table.slug),
+      index('workspaces_tenant_idx').on(table.tenantId),
+      index('workspaces_org_idx').on(table.organizationId),
+      index('workspaces_branch_idx').on(table.branchId),
+      index('workspaces_bu_idx').on(table.businessUnitId),
+      index('workspaces_owner_idx').on(table.ownerId),
+   ]
 );
 
 export const workspacesRelations = relations(workspacesTable, ({ one }) => ({

@@ -22,10 +22,10 @@ export const activityLogsTable = pgTable(
       metadata: jsonb('metadata').default({}),
       createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
    },
-   (t) => ({
-      tenantIdx: index('activity_logs_tenant_idx').on(t.tenantId),
-      actorIdx: index('activity_logs_actor_idx').on(t.actorUserId),
-   })
+   (t) => [
+      index('activity_logs_tenant_idx').on(t.tenantId),
+      index('activity_logs_actor_idx').on(t.actorUserId),
+   ]
 );
 
 export const activityLogsRelations = relations(activityLogsTable, ({ one }) => ({

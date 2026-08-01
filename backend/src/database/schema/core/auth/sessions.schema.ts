@@ -28,11 +28,11 @@ export const sessionsTable = pgTable(
 
       ...timestamps(),
    },
-   (t) => ({
-      userIdx: index('sessions_user_idx').on(t.userId),
-      tokenIdx: index('sessions_token_idx').on(t.token),
-      deviceIdx: index('sessions_device_idx').on(t.deviceId),
-   }),
+   (t) => [
+      index('sessions_user_idx').on(t.userId),
+      index('sessions_token_idx').on(t.token),
+      index('sessions_device_idx').on(t.deviceId),
+   ],
 );
 
 export const sessionsRelations = relations(sessionsTable, ({ one }) => ({

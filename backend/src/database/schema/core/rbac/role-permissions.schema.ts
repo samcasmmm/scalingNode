@@ -13,9 +13,9 @@ export const rolePermissionsTable = pgTable(
          .notNull()
          .references((): AnyPgColumn => permissionsTable.id, { onDelete: 'cascade' }),
    },
-   (t) => ({
-      pk: primaryKey({ columns: [t.roleId, t.permissionId] }),
-   })
+   (t) => [
+      primaryKey({ columns: [t.roleId, t.permissionId] }),
+   ]
 );
 
 export const rolePermissionsRelations = relations(rolePermissionsTable, ({ one }) => ({

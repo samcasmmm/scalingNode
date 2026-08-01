@@ -8,6 +8,9 @@ export * from './auth/index.js';
 // core.rbac
 export * from './rbac/index.js';
 
+// core.subscription
+export * from './subscription/index.js';
+
 // core.tenants
 export * from './tenants/index.js';
 

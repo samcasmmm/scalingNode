@@ -3,7 +3,7 @@ import { type AnyPgColumn, bigint, index, pgTable, text, timestamp, varchar } fr
 import { idColumn } from '@/database/schema/core/_shared.columns.js';
 import { tenantsTable, usersTable } from '@/database/index.js';
 
-/** Error Logs — application errors captured for support/debugging (separate from infra logs/Sentry). */
+/** Error Logs — application errors captured for support/debugging. */
 export const errorLogsTable = pgTable(
    'error_logs',
    {
@@ -23,10 +23,10 @@ export const errorLogsTable = pgTable(
       statusCode: varchar('status_code', { length: 10 }),
       createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
    },
-   (t) => ({
-      tenantIdx: index('error_logs_tenant_idx').on(t.tenantId),
-      userIdx: index('error_logs_user_idx').on(t.userId),
-   })
+   (t) => [
+      index('error_logs_tenant_idx').on(t.tenantId),
+      index('error_logs_user_idx').on(t.userId),
+   ]
 );
 
 export const errorLogsRelations = relations(errorLogsTable, ({ one }) => ({

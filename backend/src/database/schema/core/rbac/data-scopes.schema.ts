@@ -17,9 +17,9 @@ export const dataScopeTable = pgTable(
       moduleKey: varchar('module_key', { length: 80 }).notNull(),
       scope: dataScopeTypeEnum('scope').default('own').notNull(),
    },
-   (t) => ({
-      roleModuleIdx: uniqueIndex('data_scopes_role_module_idx').on(t.roleId, t.moduleKey),
-   })
+   (t) => [
+      uniqueIndex('data_scopes_role_module_idx').on(t.roleId, t.moduleKey),
+   ]
 );
 
 export const dataScopeRelations = relations(dataScopeTable, ({ one }) => ({

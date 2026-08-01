@@ -22,10 +22,10 @@ export const oauthAccountsTable = pgTable(
 
       ...timestamps(),
    },
-   (t) => ({
-      userIdx: index('oauth_accounts_user_idx').on(t.userId),
-      providerAccountUq: uniqueIndex('oauth_accounts_provider_account_uq').on(t.provider, t.providerAccountId),
-   }),
+   (t) => [
+      index('oauth_accounts_user_idx').on(t.userId),
+      uniqueIndex('oauth_accounts_provider_account_uq').on(t.provider, t.providerAccountId),
+   ],
 );
 
 export const oauthAccountsRelations = relations(oauthAccountsTable, ({ one }) => ({

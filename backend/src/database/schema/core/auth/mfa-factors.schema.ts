@@ -1,10 +1,15 @@
 import { relations } from 'drizzle-orm';
-import { type AnyPgColumn, bigint, boolean, index, jsonb, pgTable, text } from 'drizzle-orm/pg-core';
+import {
+   type AnyPgColumn,
+   bigint, boolean,
+   index, pgTable,
+   text, timestamp
+} from 'drizzle-orm/pg-core';
 import { idColumn, timestamps } from '@/database/schema/core/_shared.columns.js';
 import { mfaTypeEnum } from '@/database/schema/core/_core.enum.js';
 import { usersTable } from '@/database/index.js';
 
-/** MFA factors enrolled per user. */
+/** MFA Factors — TOTP secrets, WebAuthn credentials, backup codes. */
 export const mfaFactorsTable = pgTable(
    'mfa_factors',
    {
@@ -16,15 +21,15 @@ export const mfaFactorsTable = pgTable(
 
       type: mfaTypeEnum('type').notNull(),
       secret: text('secret'),
-      isVerified: boolean('is_verified').default(false).notNull(),
       isPrimary: boolean('is_primary').default(false).notNull(),
-      recoveryCodes: jsonb('recovery_codes').default([]),
+      verifiedAt: timestamp('verified_at', { mode: 'date', withTimezone: true }),
+      lastUsedAt: timestamp('last_used_at', { mode: 'date', withTimezone: true }),
 
       ...timestamps(),
    },
-   (t) => ({
-      userIdx: index('mfa_factors_user_idx').on(t.userId),
-   }),
+   (t) => [
+      index('mfa_factors_user_idx').on(t.userId),
+   ],
 );
 
 export const mfaFactorsRelations = relations(mfaFactorsTable, ({ one }) => ({

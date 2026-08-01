@@ -47,10 +47,10 @@ export const organizationsTable = pgTable(
 
       version: versionColumn(),
    },
-   (table) => ({
-      tenantIdx: index('organizations_tenant_idx').on(table.tenantId),
-      emailIdx: index('organizations_email_idx').on(table.email),
-   })
+   (table) => [
+      index('organizations_tenant_idx').on(table.tenantId),
+      index('organizations_email_idx').on(table.email),
+   ]
 );
 
 export const organizationsRelations = relations(organizationsTable, ({ one, many }) => ({
