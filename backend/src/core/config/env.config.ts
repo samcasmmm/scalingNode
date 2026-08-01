@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import dotenv from 'dotenv';
 import path from 'path';
+import { clog } from '../shared/utils/console.utils.js';
 
 export const ENV_ENUMS = {
   PRODUCTION: 'production',
@@ -121,6 +122,9 @@ const envSchema = z.object({
 // -----------------------------------------------------------------------------
 const parsed = envSchema.safeParse(process.env);
 
+if (parsed.success) {
+  clog.success('Environment variables loaded successfully');
+}
 if (!parsed.success) {
   console.error('❌ Environment validation failed:', parsed.error.format());
   process.exit(1);
