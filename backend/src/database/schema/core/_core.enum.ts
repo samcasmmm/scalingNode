@@ -1,6 +1,40 @@
 import { pgEnum } from 'drizzle-orm/pg-core';
 
 
+// user enums
+export const accountStatusEnum = pgEnum("account_status", [
+   "pending",
+   "active",
+   "inactive",
+   "suspended",
+]);
+
+
+// auth
+
+export const oauthProviderEnum = pgEnum("oauth_provider", [
+   "google",
+   "microsoft",
+   "apple",
+]);
+
+export const otpPurposeEnum = pgEnum("otp_purpose", [
+   "LOGIN",
+   "SIGNUP",
+   "MFA",
+   "FORGOT_PASSWORD",
+   "RESET_PASSWORD",
+   "CHANGE_PASSWORD",
+   "CHANGE_EMAIL",
+   "CHANGE_PHONE",
+]);
+
+export const mfaTypeEnum = pgEnum("mfa_type", [
+   "totp",
+   "sms",
+   "email",
+   "webauthn",
+]);
 
 
 // tenant enums

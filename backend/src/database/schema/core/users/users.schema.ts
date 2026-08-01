@@ -9,6 +9,7 @@ import {
    workspacesTable,
    teamMembersTable,
    groupMembersTable,
+   accountStatusEnum,
 } from '@/database/index.js';
 
 export const usersTable = pgTable(
@@ -39,7 +40,8 @@ export const usersTable = pgTable(
          onDelete: 'set null',
       }),
 
-      isActive: flagColumn('is_active', true),
+      accountStatus: accountStatusEnum('account_status').default('pending').notNull(),
+
       version: versionColumn(),
 
       ...auditActorColumns((): AnyPgColumn => usersTable.id),
