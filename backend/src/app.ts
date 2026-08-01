@@ -9,6 +9,8 @@ import { notFoundMiddleware } from './core/middlewares/not-found.middleware.js';
 import { errorHandlerMiddleware } from './core/middlewares/error.middleware.js';
 import publicRouter from './routes/public.routes.js';
 import authenticatedRouter from './routes/authenticated.routes.js';
+import ResponseBuilder from './core/response/response.builder.js';
+import { ResponseBuilderMiddleware } from './core/response/response.middleware.js';
 
 class App {
   public readonly instance: Application;
@@ -59,13 +61,13 @@ class App {
     this.instance.use(observability);
   }
   private initializeMiddleWares(): void {
-    this.instance.use(rateLimit);
+    this.instance.use(ResponseBuilderMiddleware);
   }
   private initializePublicRoutes(): void {
-    this.instance.use('/api/v1/public', publicRouter);
+    this.instance.use('/api/public', publicRouter);
   }
   private initializePrivateRoutes(): void {
-    this.instance.use('/api/v1', authenticatedRouter);
+    this.instance.use('/api', authenticatedRouter);
   }
   private initializeErrorHandling(): void {
     this.instance.use(notFoundMiddleware);
