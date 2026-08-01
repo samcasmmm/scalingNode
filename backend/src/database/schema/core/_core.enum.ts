@@ -48,6 +48,27 @@ export const dataScopeTypeEnum = pgEnum('data_scope_type', [
 ]);
 
 
+// notification enums
+export const notificationChannelEnum = pgEnum('notification_channel', [
+   'email',
+   'sms',
+   'push',
+   'whatsapp',
+   'slack',
+   'teams',
+   'discord',
+   'webhook',
+]);
+
+export const notificationStatusEnum = pgEnum('notification_status', [
+   'queued',
+   'sent',
+   'delivered',
+   'failed',
+   'read',
+]);
+
+
 // subscription enums
 export const subscriptionStatusEnum = pgEnum('subscription_status', [
    'trialing',

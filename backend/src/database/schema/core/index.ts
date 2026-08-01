@@ -5,6 +5,9 @@ export * from './_shared.columns.js';
 // core.auth
 export * from './auth/index.js';
 
+// core.notifications
+export * from './notifications/index.js';
+
 // core.rbac
 export * from './rbac/index.js';
 
